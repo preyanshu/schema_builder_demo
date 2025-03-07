@@ -44,7 +44,7 @@ export const EmptyValueField: FC<EmptyValueFieldProps> = memo(({ value, path, on
           default: defaultValue = '';
         }
     
-        let newInputValue = (newType === 'object' || newType === 'array')
+        const newInputValue = (newType === 'object' || newType === 'array')
           ? JSON.stringify(defaultValue, null, 2)
           : defaultValue.toString();
     

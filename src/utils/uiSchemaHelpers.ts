@@ -486,7 +486,7 @@ export function determineFieldType(schema : any) {
           }
   
           // Clone the referenced definition to avoid modifying the original.
-          let resolved = JSON.parse(JSON.stringify(refDefinition));
+          const resolved = JSON.parse(JSON.stringify(refDefinition));
   
           // Merge any additional properties from the original object (except $ref)
           for (const key in obj) {
