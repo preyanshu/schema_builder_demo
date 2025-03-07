@@ -1,0 +1,114 @@
+{
+    "schema":{
+      "type": "object",
+      "properties": {
+        "location": {
+          "enumNames": [
+            "New York",
+            "Amsterdam",
+            "Hong Kong"
+          ],
+          "enum": [
+            {
+              "name": "New York",
+              "lat": 40,
+              "lon": 74
+            },
+            {
+              "name": "Amsterdam",
+              "lat": 52,
+              "lon": 5
+            },
+            {
+              "name": "Hong Kong",
+              "lat": 22,
+              "lon": 114
+            }
+          ]
+        },
+        "locationRadio": {
+          "enumNames": [
+            "New York",
+            "Amsterdam",
+            "Hong Kong"
+          ],
+          "enum": [
+            {
+              "name": "New York",
+              "lat": 40,
+              "lon": 74
+            },
+            {
+              "name": "Amsterdam",
+              "lat": 52,
+              "lon": 5
+            },
+            {
+              "name": "Hong Kong",
+              "lat": 22,
+              "lon": 114
+            }
+          ]
+        },
+        "multiSelect": {
+          "title": "Locations",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enumNames": [
+              "New York",
+              "Amsterdam",
+              "Hong Kong"
+            ],
+            "enum": [
+              {
+                "name": "New York",
+                "lat": 40,
+                "lon": 74
+              },
+              {
+                "name": "Amsterdam",
+                "lat": 52,
+                "lon": 5
+              },
+              {
+                "name": "Hong Kong",
+                "lat": 22,
+                "lon": 114
+              }
+            ]
+          }
+        },
+        "checkboxes": {
+          "title": "Locations Checkboxes",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enumNames": [
+              "New York",
+              "Amsterdam",
+              "Hong Kong"
+            ],
+            "enum": [
+              {
+                "name": "New York",
+                "lat": 40,
+                "lon": 74
+              },
+              {
+                "name": "Amsterdam",
+                "lat": 52,
+                "lon": 5
+              },
+              {
+                "name": "Hong Kong",
+                "lat": 22,
+                "lon": 114
+              }
+            ]
+          }
+        }
+      }
+    } ,
+    "ui-schema":{}
+    }
