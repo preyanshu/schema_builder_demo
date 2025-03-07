@@ -69,16 +69,29 @@ export function determineFieldType(schema : any) {
   //generate template UI schema
   export function generateUISchema(jsonSchema: any, options: any = {}): any {
     const defaultOptions = {
-      useUiOptionsWrapper: true,
-      defaultWidgets: {
+    useUiOptionsWrapper: false,
+    globalOptions: {
+      copyable: true,
+      label: false
+    },
+    submitButtonOptions: {
+      props: {
+        disabled: false
+      },
+      norender: false,
+      submitText: 'Save'
+    },
+     defaultWidgets: {
         string: 'text',
         number: 'updown',
         boolean: 'checkbox',
+        date: 'date',
+        "date-time": 'datetime',
+        time : "time"
         
       },
-      globalOptions: {},
       ...options
-    };
+  };
   
     // Recursively process the schema
     function processSchema(schema: any, path: string[] = [], isRoot = false): any {
@@ -323,51 +336,104 @@ export function determineFieldType(schema : any) {
   }
   
   // Deep merge for objects
-  export function deepMerge(target: any, source: any): any {
-    Object.keys(source).forEach((key) => {
-      if (Array.isArray(source[key])) {
-        // Overwrite arrays
-        target[key] = source[key];
-      } else if (source[key] && typeof source[key] === "object") {
-        if (!target[key] || typeof target[key] !== "object") {
-          target[key] = {};
+  export function deepMerge(obj1:any, obj2:any) {
+    const result = { ...obj1 };
+  
+    // Recursive merge with obj2 priority
+    for (const key in obj2) {
+      if (Object.prototype.hasOwnProperty.call(obj2, key)) {
+        const val1 = obj1[key];
+        const val2 = obj2[key];
+  
+        if (
+          val1 !== null &&
+          val2 !== null &&
+          typeof val1 === 'object' &&
+          typeof val2 === 'object' &&
+          !Array.isArray(val1) &&
+          !Array.isArray(val2)
+        ) {
+          result[key] = deepMerge(val1, val2);
+        } else {
+          result[key] = val2;
         }
-        deepMerge(target[key], source[key]);
-      } else {
-        target[key] = source[key];
       }
-    });
-    return target;
+    }
+  
+    return processUiEquivalents(result);
   }
   
-  // Canonicalize and normalize UI keys
-  export function canonicalize(obj: any): any {
-    if (Array.isArray(obj)) {
-      return obj.map(canonicalize);
-    } else if (obj && typeof obj === "object") {
-      const keysToCanonicalize = ["description", "help", "title", "placeholder", "readonly", "disabled"];
-      const newObj:any = {};
-      for (const key in obj) {
-        if (key === "ui:options" && typeof obj[key] === "object") {
-          // Move recognized keys from ui:options to top-level "ui:key"
-          for (const optKey in obj[key]) {
-            if (keysToCanonicalize.includes(optKey)) {
-              newObj[`ui:${optKey}`] = obj[key][optKey];
-            } else {
-              newObj[optKey] = canonicalize(obj[key][optKey]);
-            }
-          }
-        } else {
-          newObj[key] = canonicalize(obj[key]);
+  function processUiEquivalents(obj:any) {
+    if (typeof obj !== 'object' || obj === null) return obj;
+  
+    // Process nested objects first
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        obj[key] = processUiEquivalents(obj[key]);
+      }
+    }
+  
+    // Handle ui:options equivalence
+    if (obj['ui:options']) {
+      const uiOptions = obj['ui:options'];
+      for (const optionKey in uiOptions) {
+        const uiKey = `ui:${optionKey}`;
+        if (obj.hasOwnProperty(uiKey)) {
+          delete obj[uiKey];
         }
       }
-      return newObj;
     }
+  
+    // Process order arrays
+    processOrderArray(obj);
+  
     return obj;
   }
   
-  export function normalizeSchema(schema: any): any{
-    return canonicalize(schema);
+  function processOrderArray(obj:any) {
+    const orderKey = obj.hasOwnProperty('ui:order') ? 
+      'ui:order' : 
+      (obj['ui:options']?.order ? 'ui:options.order' : null);
+    
+    if (!orderKey) return;
+  
+    const orderArray = orderKey === 'ui:order' ? 
+      obj['ui:order'] : 
+      obj['ui:options'].order;
+    
+    if (!Array.isArray(orderArray)) return;
+  
+    // Get schema keys (non-UI keys)
+    const schemaKeys = Object.keys(obj).filter(key => 
+      !key.startsWith('ui:') && 
+      key !== 'ui:options'
+    );
+  
+    // Get existing keys from order array
+    const existingKeys = orderArray.filter(item => item !== '*');
+  
+    // Replace '*' with missing schema keys
+    const newOrder = [];
+    for (const item of orderArray) {
+      if (item === '*') {
+        const remainingKeys = schemaKeys.filter(k => 
+          !existingKeys.includes(k)
+        );
+        newOrder.push(...remainingKeys);
+      } else {
+        newOrder.push(item);
+      }
+    }
+  
+    // Remove duplicates and remaining '*' characters
+    const uniqueOrder = [...new Set(newOrder)].filter(item => item !== '*');
+  
+    // Update the order array
+    if (orderKey === 'ui:order') {
+      obj['ui:order'] = uniqueOrder;
+    } else {
+      obj['ui:options'].order = uniqueOrder;
+    }
   }
   //resolves refs from jsonschema
   export function resolveSchema(schema: any): any{

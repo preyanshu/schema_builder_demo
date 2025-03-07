@@ -111,7 +111,7 @@ const updateSchema = useCallback((path:any, value:any) => {
             <CardContent className="space-y-4">
               {Array.isArray(value) &&
                 value.map((condition, index) => (
-                  <div key={`${key}-${index}`} className="mb-6">
+                  <div key={`${fieldKey}-cond-${index}-${depth}`} className="mb-6">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-xs font-medium">
                         Condition {index + 1}
@@ -149,14 +149,14 @@ const updateSchema = useCallback((path:any, value:any) => {
         return (
           <Card className="ml-4 min-w-[250px]">
             <CardContent className="pt-4 space-y-4">
-            <fieldset className="space-y-4" key={path.toString()}>
+            <fieldset className="space-y-4" key={`${fieldKey}-cond-${depth}`}>
 
                 <legend className="text-sm font-medium mb-2">
                   {key.replace(/^ui:/, '')}
                 </legend>
                 {value.hasOwnProperty('ui:order') &&
                   Array.isArray(value['ui:order']) && (
-                    <div className={`ml-${(depth + 1) * 4} mb-4`}>
+                    <div className={`ml-${(depth + 1) * 4} mb-4`} >
                       <Label className="block text-sm font-medium mb-1">
                         Order
                       </Label>
@@ -169,10 +169,14 @@ const updateSchema = useCallback((path:any, value:any) => {
                     </div>
                   )}
                 {sortedKeys
-                  .filter((subKey) => subKey !== 'ui:order')
-                  .map((subKey) =>
-                    renderField(subKey, value[subKey], fullPath, depth + 1)
-                  )}
+          .filter((subKey) => subKey !== 'ui:order')
+          .map((subKey) => (
+            <div 
+              key={`${fieldKey}-subkey-${subKey}-${depth}`}
+            >
+              {renderField(subKey, value[subKey], fullPath, depth + 1)}
+            </div>
+          ))}
               </fieldset>
             </CardContent>
           </Card>
@@ -212,7 +216,7 @@ const updateSchema = useCallback((path:any, value:any) => {
            </Label>
            <div className="flex flex-col gap-2">
              {value.map((item, index) => (
-               <div key={`${fieldKey}-${index}`} className="border p-2">
+               <div key={`${fieldKey}-item-${index}-${depth}`} className="border p-2">
                  {Object.entries(item).map(([subKey, subValue]) =>
                    renderField(
                      subKey,

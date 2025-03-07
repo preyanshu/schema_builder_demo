@@ -107,6 +107,7 @@ body {
 
 
   .dark input[type="date"],
+  .dark input[type="number"],
   .dark input[type="time"],
   .dark input[type="datetime-local"] {
     @apply text-white bg-background border-gray-600 border border-border rounded-md px-3 py-2 outline-none;

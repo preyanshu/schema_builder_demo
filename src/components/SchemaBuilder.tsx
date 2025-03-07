@@ -18,7 +18,6 @@ import { defaultJsonSchema ,UISchema} from "@/constants";
 import {
   generateUISchema,
   deepMerge,
-  normalizeSchema,
   resolveSchema,
   cleanUiSchema
 } from "@/utils/uiSchemaHelpers" 
@@ -121,11 +120,13 @@ export default function UISchemaEditorDemo() {
 
         const generatedUiSchema = generateUISchema(resolvedSchema)
   
-        // 2) Normalize the existing "ui-schema" if you want to canonicalize keys
-        const normalizedExistingUiSchema = normalizeSchema(data["ui-schema"])
   
-        // 3) Deep merge the existing ui-schema into the newly generated one
-        const finalUiSchema = deepMerge(normalizedExistingUiSchema, generatedUiSchema)
+        //Deep merge the existing ui-schema into the newly generated one
+        const finalUiSchema = deepMerge(generatedUiSchema,data["ui-schema"])
+
+        console.log("finalUiSchema",finalUiSchema)
+
+        
   
         // 4) Store results in state
         setJsonSchema(data.schema)
@@ -248,7 +249,7 @@ export default function UISchemaEditorDemo() {
                 onChange={handleFileChange}
               />
             </div>
-            {importError && <p className="text-red-500">{importError}</p>}
+            {importError && <p className="text-red-500 whitespace-pre-wrap break-words">{importError}</p>}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>

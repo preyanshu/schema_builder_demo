@@ -26,7 +26,7 @@ export const EmptyValueField: FC<EmptyValueFieldProps> = memo(({ value, path, on
             newInputValue = '';
           }
         } else {
-          newInputValue = value !== undefined ? value.toString() : '';
+          newInputValue = value !== undefined ? value?.toString() : '';
         }
     
         setInputValue(newInputValue);

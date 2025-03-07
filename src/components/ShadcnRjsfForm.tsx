@@ -1,28 +1,51 @@
 "use client"
-import React from "react"
+
+import React, { useState, ChangeEvent, FocusEvent } from "react"
+import { v4 as uuidv4 } from "uuid"
 import { withTheme } from "@rjsf/core"
+import { 
+  ariaDescribedByIds, 
+  descriptionId, 
+  getTemplate, 
+  labelValue, 
+  schemaRequiresTrueValue, 
+  enumOptionsIsSelected, 
+  enumOptionsSelectValue, 
+  enumOptionsDeselectValue, 
+  enumOptionsIndexForValue, 
+  enumOptionsValueForIndex, 
+  optionId 
+} from "@rjsf/utils"
+
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
+import { FancyMultiSelect } from "@/components/ui/fancy-multi-select"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
+import { 
+  Select, 
+  SelectTrigger, 
+  SelectContent, 
+  SelectItem, 
+  SelectValue, 
+  SelectGroup 
+} from "@/components/ui/select"
+
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardContent, 
+  CardFooter 
 } from "@/components/ui/card"
-import { ArrowUp, ArrowDown, Trash2 } from "lucide-react";
-import { ChangeEvent, FocusEvent } from "react"
+
+import { ArrowUp, ArrowDown, Trash2 } from "lucide-react"
+
+
 
 //
 interface ErrorListProps {
@@ -73,11 +96,11 @@ const DescriptionField = ({ description }: any) =>
   description ? <Description>{description}</Description> : null
 
 /* ObjectFieldTemplate - Wraps objects in a grid card */
-const ObjectFieldTemplate = ({ title, description, properties }: any) => (
-  <Card className="  my-3 ">
+const ObjectFieldTemplate = ({ title, description, properties,required }: any) => (
+  <Card className=" pt-3 my-3 ">
     {(title || description) && (
       <CardHeader>
-        {title && <CardTitle>{title}</CardTitle>}
+        {title && <CardTitle>{title}</CardTitle>  }
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
     )}
@@ -238,170 +261,71 @@ const _onFocus = ({ target: { value } }: ChangeEvent<HTMLTextAreaElement>) =>
 </>)}
 
 
-/* Fixed Select Widget */
+
 const SelectWidget = ({
+  schema,
   id,
-  required,
-  value,
-  onChange,
   options,
-  placeholder,
+  required,
   disabled,
   readonly,
-  multiple,
-}: any) => {
-  // Normalize a value for comparison. For objects, use the "name" field.
-  const normalizeValue = (val: any) => {
-    if (typeof val === "object" && val !== null) {
-      return val.name || val.value || "";
-    }
-    return val;
-  };
-
-  // SINGLE SELECT: Render a Select dropdown
-  if (!multiple) {
-    const normalizedValue = normalizeValue(value);
-    const getLabel = (normVal: any) => {
-      const found = options.enumOptions.find(
-        (opt: any) => normalizeValue(opt.value) === normVal
-      );
-      return found
-        ? found.label ||
-            (typeof found.value === "object"
-              ? found.value.name
-              : found.value)
-        : normVal;
-    };
-
-    return (
-      <>
-        <div className="relative">
-        <Select
-          value={normalizedValue}
-          onValueChange={(val) => {
-            const found = options.enumOptions.find(
-              (opt: any) => normalizeValue(opt.value) === val
-            );
-            onChange(found ? found.value : val);
-          }}
-          disabled={disabled || readonly}
-        >
-          <SelectTrigger className="my-3">
-            <SelectValue placeholder={placeholder||"Select"}>
-            { getLabel(normalizeValue(value))
-  }
-        
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {options.enumOptions.map((option: any) => {
-              const norm = normalizeValue(option.value);
-              return (
-                <SelectItem key={norm} value={norm}>
-                  {option.label ||
-                    (typeof option.value === "object"
-                      ? option.value.name
-                      : option.value)}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-      </div>
-    </>);
-  }
-
-  // MULTIPLE SELECT: Render a list of checkboxes
-  else {
-    const selectedNormalized = Array.isArray(value)
-      ? value.map(normalizeValue)
-      : [];
-
-    const handleCheckboxChange = (norm: any, checked: boolean) => {
-      let newSelected;
-      if (checked) {
-        newSelected = [...selectedNormalized, norm];
-      } else {
-        newSelected = selectedNormalized.filter((v) => v !== norm);
-      }
-      // Map normalized values back to their full option values.
-      const newValues = newSelected.map((normVal: any) => {
-        const found = options.enumOptions.find(
-          (opt: any) => normalizeValue(opt.value) === normVal
-        );
-        return found ? found.value : normVal;
-      });
-      onChange(newValues);
-    };
-
-    return (
-      <div className="space-y-2 relative">
-        {options.enumOptions.map((option: any) => {
-          const norm = normalizeValue(option.value);
-          const checked = selectedNormalized.includes(norm);
-          return (
-            <div key={norm} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id={`${id}-${norm}`}
-                disabled={disabled || readonly}
-                checked={checked}
-                onChange={(e) =>
-                  handleCheckboxChange(norm, e.target.checked)
-                }
-              />
-              <label htmlFor={`${id}-${norm}`}>
-                {option.label ||
-                  (typeof option.value === "object"
-                    ? option.value.name
-                    : option.value)}
-              </label>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-};
-
-
-
-
-
-/* Checkbox Widget */
-const CheckboxWidget = ({
-  id,
   value,
+  multiple,
+  autofocus,
   onChange,
   onBlur,
   onFocus,
-  disabled,
-  readonly,
-  options
+  placeholder,
+  rawErrors = [],
 }: any) => {
-
-
-const _onChange = ({ target: { value } }: ChangeEvent<HTMLButtonElement>) =>
-    onChange(value === null || value === undefined ? options.emptyValue : value
-    )
-
-const _onBlur = ({ target: { value } }: ChangeEvent<HTMLButtonElement>) =>
-  onBlur(id, value)
-
-const _onFocus = ({ target: { value } }: ChangeEvent<HTMLButtonElement>) =>
-  onFocus(id, value)
+  const { enumOptions, enumDisabled, emptyValue: optEmptyValue } = options;
+  
+  const [selectedIndex, setSelectedIndex] = useState(
+    enumOptionsIndexForValue(value, enumOptions, false) as unknown as string
+  );
 
   return (
-    <div className="flex items-center space-x-2 relative">
-      <Checkbox
-        id={id}
-        checked={value}
-        onChange={_onChange}
-        onBlur={_onBlur}
-        onFocus={_onFocus}
-        disabled={disabled || readonly}
-      />
-      <Label htmlFor={id}></Label>
+    <div className="my-3 relative">
+      {!multiple ? (
+        <Select 
+          required={required}
+          disabled={disabled}
+          value={selectedIndex}
+          onValueChange={(v: string) => {
+            setSelectedIndex(v);
+            onChange((enumOptions as any)[v].value);
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {(enumOptions as any).map(({ value: _value, label }: any, i: number) => {
+                const disabledItem = 
+                  Array.isArray(enumDisabled) && enumDisabled.indexOf(_value) !== -1;
+                return (
+                  <SelectItem
+                    key={i}
+                    id={label}
+                    value={i.toString()}
+                    disabled={disabledItem}
+                  >
+                    {label}
+                  </SelectItem>
+                );
+              })}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      ) : (
+        <FancyMultiSelect
+          multiple
+          items={enumOptions}
+          selected={value}
+          onValueChange={onChange}
+        />
+      )}
     </div>
   );
 };
@@ -448,26 +372,6 @@ const PasswordWidget = ({
 
   
 
-
-  
-/* Submit Button */
-const SubmitButton = (
-  {uiSchema}: any) => {
-  const options = uiSchema["ui:options"]?.submitButtonOptions 
-  
-return(<>
-{!options.norender && <>
-
-  <Button type="submit"   >
-    {options.submitText || "Submit"} 
-  </Button>
-
-</>
-}
- 
-  
-  </>)}
-
 function ErrorListTemplate(props: ErrorListProps) {
   const { errors } = props;
   return (
@@ -489,38 +393,6 @@ function ErrorListTemplate(props: ErrorListProps) {
 
 
 
-/* Range Widget */
-const RangeWidget = ({ id, value, onChange,onBlur,onFocus, schema, disabled, readonly, options }: any) => {
-
-  const _onChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-    onChange(value === null || value === undefined ? options.emptyValue : value
-    )
-
-  const _onBlur = ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-  onBlur(id, value)
-
-  const _onFocus = ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-  onFocus(id, value)
-
-  return (
-    <div className="flex items-center gap-2 relative">
-      <Input
-        id={id}
-        type="range"
-        value={value}
-        min={schema.min}
-        max={schema.max}
-        step={schema.step}
-        onChange={_onChange}
-        onBlur={_onBlur}
-        onFocus={_onFocus}
-        disabled={disabled || readonly}
-        className="flex-1"
-      />
-      <span className="text-sm w-16">{value}</span>
-    </div>
-  );
-};
 
 /* Email Widget */
 const EmailWidget = ({ id, required, value, onChange,onBlur,onFocus ,placeholder, disabled, readonly, autofocus, options }: any) => {
@@ -581,114 +453,206 @@ const URLWidget = ({ id, required, value, onChange,onBlur,onFocus, placeholder, 
 };
 
 
+//checkbox widget
+
+const CheckboxWidget=(props: any)=> {
+  const {
+    id,
+    value,
+    disabled,
+    readonly,
+    label,
+    hideLabel,
+    schema,
+    autofocus,
+    options,
+    onChange,
+    onBlur,
+    onFocus,
+    registry,
+    uiSchema,
+  } = props
+
+  const required = schemaRequiresTrueValue(schema)
+  const DescriptionFieldTemplate = getTemplate("DescriptionFieldTemplate", registry, options)
+
+  const _onChange = ({target: {checked}}: FocusEvent<HTMLInputElement>) =>
+    onChange(checked)
+  const _onBlur = ({target: {checked}}: FocusEvent<HTMLInputElement>) =>
+    onBlur(id, checked)
+  const _onFocus = ({target: {checked}}: FocusEvent<HTMLInputElement>) =>
+    onFocus(id, checked)
+
+  const description = options.description || schema.description
+  return (
+    <div
+      className={`relative mt-3 ${
+        disabled || readonly ? "cursor-not-allowed opacity-50" : ""
+      }`}
+      aria-describedby={ariaDescribedByIds(id)}
+    >
+      {!hideLabel && !!description && (
+        <DescriptionFieldTemplate
+          id={descriptionId(id)}
+          description={description}
+          schema={schema}
+          uiSchema={uiSchema}
+          registry={registry}
+        />
+      )}
+      <div className="flex items-center space-x-2">
+        <Checkbox id={id}
+                  name={id}
+                  required={required}
+                  disabled={disabled || readonly}
+                  autoFocus={autofocus}
+                  onCheckedChange={onChange}
+                  defaultChecked={typeof value !== "undefined"}
+        />
+        <label
+          htmlFor={id}
+          className="form-checkbox text-primary"
+        >
+          {labelValue(label, hideLabel || !label)}
+        </label>
+      </div>
+    </div>
+  )
+}
 
 
-const NumberWidget = ({
-  id,
-  value,
-  onChange,
-  onBlur,
-  onFocus,
-  schema,
-  disabled,
-  readonly,
-  placeholder,
-  required,
-  autofocus,
-  options
-}: any) => {
+const RadioWidget=({
+    id,
+    options,
+    value,
+    required,
+    disabled,
+    readonly,
+    onChange,
+    onBlur,
+    onFocus,
+  }: any)=> {
+  const {enumOptions, enumDisabled, emptyValue} = options
 
-  const step = schema.multipleOf || 1;
-  const min = schema.minimum;
-  const max = schema.maximum;
+  const _onChange = (value: string) =>
+    onChange(enumOptionsValueForIndex(value, enumOptions, emptyValue))
+  const _onBlur = ({target: {value}}: FocusEvent<HTMLInputElement>) =>
+    onBlur(id, enumOptionsValueForIndex(value, enumOptions, emptyValue))
+  const _onFocus = ({target: {value}}: FocusEvent<HTMLInputElement>) =>
+    onFocus(id, enumOptionsValueForIndex(value, enumOptions, emptyValue))
 
-  const _onChange = (value: any) =>
-    onChange(value === null || value === undefined ? options.emptyValue : value
-    )
-
-  const _onBlur = ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-  onBlur(id, value)
-
-  const _onFocus = ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-  onFocus(id, value)
-
-  const handleIncrement = () => {
-    if (value === "" || value === undefined || value === null) {
-      onChange(min !== undefined ? min : 0);
-    } else {
-      const newValue = max !== undefined ? Math.min(max, value + step) : value + step;
-      onChange(newValue);
-    }
-  };
-
-  const handleDecrement = () => {
-    if (value === "" || value === undefined || value === null) {
-      onChange(min !== undefined ? min : 0);
-    } else {
-      const newValue = min !== undefined ? Math.max(min, value - step) : value - step;
-      onChange(newValue);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    if (inputValue === "") {
-      _onChange("");
-    } else {
-      const numericValue = parseFloat(inputValue);
-      if (!isNaN(numericValue)) {
-        let newValue = numericValue;
-        if (min !== undefined) newValue = Math.max(min, newValue);
-        if (max !== undefined) newValue = Math.min(max, newValue);
-        _onChange(newValue);
-      }
-    }
-  };
+  const inline = Boolean(options && options.inline)
 
   return (
-    <div className="flex items-center gap-1 mt-3">
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={handleDecrement}
-        disabled={disabled || readonly || (min !== undefined && value !== "" && value <= min)}
-        className="h-9"
-      >
-        -
-      </Button>
+    <div className="mb-0 mt-3 relative">
+      <RadioGroup defaultValue={value?.toString()} onValueChange={(e: string) => {
+        console.log(e);
+        _onChange(e);
+      }} onBlur={_onBlur} onFocus={_onFocus}
+                  aria-describedby={ariaDescribedByIds(id)} orientation={inline ? "horizontal" : "vertical"}>
+        {Array.isArray(enumOptions) &&
+          enumOptions.map((option, index) => {
+            const itemDisabled =
+              Array.isArray(enumDisabled) &&
+              enumDisabled.indexOf(option.value) !== -1
+            return (<div className="flex items-center space-x-2" key={optionId(id, index)}>
+              <RadioGroupItem value={index.toString()} id={optionId(id, index)} disabled={itemDisabled}/>
+              <Label>{option.label}</Label>
+            </div>);
+          })}
+      </RadioGroup>
 
-      <Input
-        id={id}
-        type="number"
-        value={value}
-        onChange={handleInputChange}
-        onBlur={_onBlur}
-        onFocus={_onFocus}
-        min={min}
-        max={max}
-        step={step}
-        placeholder={placeholder}
-        required={required}
-        disabled={disabled || readonly}
-        autoFocus={autofocus}
-        className="text-center w-24"
-      />
-
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={handleIncrement}
-        disabled={disabled || readonly || (max !== undefined && value !== "" && value >= max)}
-        className="h-9"
-      >
-        +
-      </Button>
     </div>
-  );
-};
+  )
+}
 
+const CheckboxesWidget=({
+      id,
+      disabled,
+      options,
+      value,
+      autofocus,
+      readonly,
+      required,
+      onChange,
+      onBlur,
+      onFocus,
+  }: any)=> {
+    const {enumOptions, enumDisabled, inline, emptyValue} = options
+    const checkboxesValues = Array.isArray(value) ? value : [value]
+
+    const _onBlur = ({target: {value}}: FocusEvent<HTMLInputElement>) =>
+        onBlur(id, enumOptionsValueForIndex(value, enumOptions, emptyValue))
+    const _onFocus = ({target: {value}}: FocusEvent<HTMLInputElement>) =>
+        onFocus(id, enumOptionsValueForIndex(value, enumOptions, emptyValue))
+
+    return (
+        <div className="space-y-4 mt-3 relative">
+            {Array.isArray(enumOptions) &&
+                enumOptions.map((option, index: number) => {
+                    const checked = enumOptionsIsSelected(
+                        option.value,
+                        checkboxesValues,
+                    )
+                    const itemDisabled =
+                        Array.isArray(enumDisabled) &&
+                        enumDisabled.indexOf(option.value) !== -1
+
+                    return (
+                        <div className="flex items-center space-x-2" key={uuidv4()}>
+                            <Checkbox id={id}
+                                      name={id}
+                                      required={required}
+                                      disabled={disabled || itemDisabled || readonly}
+                                      onCheckedChange={(state) => {
+                                          if (state) {
+                                              onChange(
+                                                  enumOptionsSelectValue(index, checkboxesValues, enumOptions),
+                                              )
+                                          } else {
+                                              onChange(
+                                                  enumOptionsDeselectValue(index, checkboxesValues, enumOptions),
+                                              )
+                                          }
+                                      }}
+                                      defaultChecked={checked}
+                                      autoFocus={autofocus && index === 0}
+                                      aria-describedby={ariaDescribedByIds(id)}
+                            />
+                            <label
+                                htmlFor={id}
+                                className="form-checkbox text-primary"
+                            >
+                                {option.label}
+                            </label>
+                        </div>
+
+                    )
+                })}
+        </div>
+    )
+}
+
+
+
+/* Submit Button */
+const SubmitButton = (
+  {uiSchema}: any) => {
+  const options = uiSchema["ui:options"]?.submitButtonOptions 
+  console.log("options",options)
+  
+return(<>
+{!options.norender && <>
+
+  <Button type="submit" disabled={options?.props?.disabled}  >
+    {options.submitText || "Submit"} 
+  </Button>
+
+</>
+}
+ 
+  
+  </>)}
 
 const Theme = {
   templates: {
@@ -705,12 +669,13 @@ const Theme = {
     TextWidget,
     TextareaWidget,
     SelectWidget,
-    CheckboxWidget,
     PasswordWidget,
-    // RangeWidget,
     EmailWidget,
     URLWidget,
-    UpDownWidget: NumberWidget  
+    RadioWidget,
+    CheckboxesWidget,
+    CheckboxWidget
+ 
   }
 }
 
