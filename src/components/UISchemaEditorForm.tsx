@@ -8,6 +8,7 @@ import {EmptyValueField} from '@/components/EmptyValueField';
 import { getNodeByPath } from '@/utils/pathHelpers';
 import { allowedWidgetsMapping,widgetOptions} from '@/constants';
 import { Label } from './ui/label';
+import { Badge } from './ui/badge';
 
 const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange }) => {
   const [localSchema, setLocalSchema] = useState<any>(uiSchema);
@@ -151,9 +152,14 @@ const updateSchema = useCallback((path:any, value:any) => {
             <CardContent className="pt-4 space-y-4">
             <fieldset className="space-y-4" key={`${fieldKey}-cond-${depth}`}>
 
-                <legend className="text-sm font-medium mb-2">
-                  {key.replace(/^ui:/, '')}
-                </legend>
+            <legend className="flex justify-between items-center text-sm font-medium mb-2 w-full">
+        <span>{key.replace(/^ui:/, '')}</span>
+        {value["ui:fieldType"] ? (
+          <Badge variant="secondary">{value["ui:fieldType"]}</Badge>
+        ) : value["ui:arrayOptions"] ? (
+          <Badge variant="secondary">Array</Badge>
+        ) : null}
+      </legend>
                 {value.hasOwnProperty('ui:order') &&
                   Array.isArray(value['ui:order']) && (
                     <div className={`ml-${(depth + 1) * 4} mb-4`} >
