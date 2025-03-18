@@ -9,6 +9,7 @@ import { getNodeByPath } from '@/utils/pathHelpers';
 import { allowedWidgetsMapping,widgetOptions} from '@/constants';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 
 const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange }) => {
   const [localSchema, setLocalSchema] = useState<any>(uiSchema);
@@ -136,7 +137,7 @@ const updateSchema = useCallback((path:any, value:any) => {
         );
       }
 
-      if (typeof value === 'object' && value !== null && !Array.isArray(value) ) {
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         const allKeys = Object.keys(value);
         let sortedKeys = allKeys;
         if (value.hasOwnProperty('ui:order') && Array.isArray(value['ui:order'])) {
@@ -146,43 +147,63 @@ const updateSchema = useCallback((path:any, value:any) => {
           );
           sortedKeys = [...order, ...unorderedKeys];
         }
+  
+        const basicKeys = ['ui:title', 'ui:description', 'ui:order'];
+        const advancedKeys = sortedKeys.filter((subKey) => !basicKeys.includes(subKey));
 
         return (
           <Card className="ml-4 min-w-[250px]">
             <CardContent className="pt-4 space-y-4">
-            <fieldset className="space-y-4" key={`${fieldKey}-cond-${depth}`}>
-
-            <legend className="flex justify-between items-center text-sm font-medium mb-2 w-full">
-        <span>{key.replace(/^ui:/, '')}</span>
-        {value["ui:fieldType"] ? (
-          <Badge variant="secondary">{value["ui:fieldType"]}</Badge>
-        ) : value["ui:arrayOptions"] ? (
-          <Badge variant="secondary">Array</Badge>
-        ) : null}
-      </legend>
-                {value.hasOwnProperty('ui:order') &&
-                  Array.isArray(value['ui:order']) && (
-                    <div className={`ml-${(depth + 1) * 4} mb-4`} >
-                      <Label className="block text-sm font-medium mb-1">
-                        Order
-                      </Label>
-                      <SortableList
-                        items={value['ui:order']}
-                        onReorder={(newOrder) =>
-                          updateSchema([...fullPath, 'ui:order'], newOrder)
-                        }
-                      />
-                    </div>
-                  )}
+              <fieldset className="space-y-4" key={`${fieldKey}-cond-${depth}`}>
+                <legend className="flex justify-between items-center text-sm font-medium mb-2 w-full">
+                  <span>{key.replace(/^ui:/, '')}</span>
+                  {value["ui:fieldType"] ? (
+                    <Badge variant="secondary">{value["ui:fieldType"]}</Badge>
+                  ) : value["ui:arrayOptions"] ? (
+                    <Badge variant="secondary">Array</Badge>
+                  ) : null}
+                </legend>
+  
+                {/* Render basic fields */}
                 {sortedKeys
-          .filter((subKey) => subKey !== 'ui:order')
-          .map((subKey) => (
-            <div 
-              key={`${fieldKey}-subkey-${subKey}-${depth}`}
-            >
-              {renderField(subKey, value[subKey], fullPath, depth + 1)}
-            </div>
-          ))}
+                  .filter((subKey) => basicKeys.includes(subKey))
+                  .map((subKey) => (
+                    <div key={`${fieldKey}-basic-${subKey}`}>
+                      {subKey === 'ui:order' ? (
+                        <div className={`ml-${(depth + 1) * 4} mb-4`}>
+                          <Label className="block text-sm font-medium mb-1">
+                            Order
+                          </Label>
+                          <SortableList
+                            items={value[subKey]}
+                            onReorder={(newOrder) =>
+                              updateSchema([...fullPath, subKey], newOrder)
+                            }
+                          />
+                        </div>
+                      ) : (
+                        renderField(subKey, value[subKey], fullPath, depth + 1)
+                      )}
+                    </div>
+                  ))}
+  
+                {/* Render Advanced Accordion if there are advanced keys */}
+                {advancedKeys.length > 0 && (
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="advanced">
+                      <AccordionTrigger className="text-sm py-2">
+                        Options
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-4 space-y-4">
+                        {advancedKeys.map((subKey) => (
+                          <div key={`${fieldKey}-advanced-${subKey}`}>
+                            {renderField(subKey, value[subKey], fullPath, depth + 1)}
+                          </div>
+                        ))}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
               </fieldset>
             </CardContent>
           </Card>
@@ -300,7 +321,7 @@ const updateSchema = useCallback((path:any, value:any) => {
     [updateSchema, localSchema, handleWidgetChange]
   );
 
-  const sortedRootKeys =
+  const sortedRootKeys = (
     localSchema.hasOwnProperty('ui:order') && Array.isArray(localSchema['ui:order'])
       ? [
           ...localSchema['ui:order'],
@@ -308,7 +329,8 @@ const updateSchema = useCallback((path:any, value:any) => {
             (key) => key !== 'ui:order' && !localSchema['ui:order'].includes(key)
           ),
         ]
-      : Object.keys(localSchema);
+      : Object.keys(localSchema)
+  ).filter(key => key !== 'ui:order');
 
   return (
     <Card className="min-w-[250px] mx-auto border-0">
@@ -328,7 +350,7 @@ const updateSchema = useCallback((path:any, value:any) => {
             />
           </div>
         )}
-
+  
         {sortedRootKeys.map((key, index) => (
           <Card key={`${key}-${index}`} className="bg-muted/50 min-w-[250px]">
             <CardContent className="pt-4 space-y-4">
