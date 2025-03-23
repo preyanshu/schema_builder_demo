@@ -45,7 +45,7 @@ export default function UISchemaEditorDemo() {
     // Build the structure: { schema, "ui-schema" }
     const data = {
       "schema": jsonSchema,
-      "ui-schema": schema,
+      "ui-schema":cleanUiSchema(schema),
     }
     const fileName = "mySchema.json"
     const fileContent = JSON.stringify(data, null, 2)
