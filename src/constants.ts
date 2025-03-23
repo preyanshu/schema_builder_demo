@@ -72,85 +72,54 @@ export const widgetOptions = [
   }
 
 export const UISchema = {
-    "ui:globalOptions": {
-      "copyable": true
+  "ui:globalOptions": {
+    "copyable": true
+  },
+  "ui:submitButtonOptions": {
+    "submitText": "Save"
+  },
+  "ui:order": [
+    "authorized_cw20_addresses",
+    "authorized_token_addresses",
+    "kernel_address",
+    "owner"
+  ],
+  "authorized_cw20_addresses": {
+    "ui:arrayOptions": {
+      "addable": true,
+      "orderable": true,
+      "removable": true
     },
-    "ui:submitButtonOptions": {
-      "props": {
-        "className": "btn-primary"
-      },
-      "submitText": "Save"
-    },
-    "ui:order": [
-      "authorized_cw20_addresses",
-      "authorized_token_addresses",
-      "kernel_address",
-      "owner"
-    ],
-    "authorized_cw20_addresses": {
-      "ui:arrayOptions": {
-        "addable": true,
-        "orderable": true,
-        "removable": true
-      },
-      "items": {
-        "ui:widget": "text",
-        "ui:inputType": "",
-        "ui:placeholder": "Enter value",
-        "ui:autofocus": false,
-        "ui:description": "A raw address (andr1....), a valid vfs path (~username/app/component), app component (./component) or ibc protocol path (ibc://cosmoshub-4/user/app/component)",
-        "ui:readonly": false,
-        "ui:disabled": false,
-        "ui:fieldType": "string",
-        "ui:emptyValue": ""
-      },
-      "ui:title": "Authorized cw20 addresses",
-      "ui:readonly": false,
-      "ui:disabled": false
-    },
-    "authorized_token_addresses": {
-      "ui:arrayOptions": {
-        "addable": true,
-        "orderable": true,
-        "removable": true
-      },
-      "items": {
-        "ui:widget": "text",
-        "ui:inputType": "",
-        "ui:placeholder": "Enter value",
-        "ui:autofocus": false,
-        "ui:description": "A raw address (andr1....), a valid vfs path (~username/app/component), app component (./component) or ibc protocol path (ibc://cosmoshub-4/user/app/component)",
-        "ui:readonly": false,
-        "ui:disabled": false,
-        "ui:fieldType": "string",
-        "ui:emptyValue": ""
-      },
-      "ui:title": "Authorized token addresses",
-      "ui:readonly": false,
-      "ui:disabled": false
-    },
-    "kernel_address": {
+    "items": {
       "ui:widget": "text",
-      "ui:inputType": "",
-      "ui:placeholder": "Enter kernel address",
-      "ui:autofocus": false,
-      "ui:title": "Kernel address",
-      "ui:readonly": false,
-      "ui:disabled": false,
-      "ui:fieldType": "string",
-      "ui:emptyValue": ""
+      "ui:placeholder": "Enter value",
+      "ui:description": "A raw address (andr1....), a valid vfs path (~username/app/component), app component (./component) or ibc protocol path (ibc://cosmoshub-4/user/app/component)"
     },
-    "owner": {
+    "ui:title": "Authorized cw20 addresses"
+  },
+  "authorized_token_addresses": {
+    "ui:arrayOptions": {
+      "addable": true,
+      "orderable": true,
+      "removable": true
+    },
+    "items": {
       "ui:widget": "text",
-      "ui:inputType": "",
-      "ui:placeholder": "Enter owner",
-      "ui:autofocus": false,
-      "ui:title": "Owner",
-      "ui:readonly": false,
-      "ui:disabled": false,
-      "ui:fieldType": "string",
-      "ui:emptyValue": ""
+      "ui:placeholder": "Enter value",
+      "ui:description": "A raw address (andr1....), a valid vfs path (~username/app/component), app component (./component) or ibc protocol path (ibc://cosmoshub-4/user/app/component)"
     },
-    "ui:title": "Example JSON Schema",
-    "ui:description": "This is a example form to demonstrate the working for UISchema builder."
+    "ui:title": "Authorized token addresses"
+  },
+  "kernel_address": {
+    "ui:widget": "text",
+    "ui:placeholder": "Enter kernel address",
+    "ui:title": "Kernel address"
+  },
+  "owner": {
+    "ui:widget": "text",
+    "ui:placeholder": "Enter owner",
+    "ui:title": "Owner"
+  },
+  "ui:title": "Example JSON Schema",
+  "ui:description": "This is a example form to demonstrate the working for UISchema builder."
 }

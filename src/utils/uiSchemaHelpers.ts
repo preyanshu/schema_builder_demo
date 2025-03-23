@@ -192,19 +192,19 @@ export function determineFieldType(schema : any) {
   
     // Common field properties
     function applyCommonProperties(schema: any, uiSchema: any, isRoot: boolean): void {
-      if (schema.title) {
+      
         if (defaultOptions.useUiOptionsWrapper) {
           uiSchema['ui:options'] = {
             ...(uiSchema['ui:options'] || {}),
             title: schema.title
           };
         } else {
-          uiSchema['ui:title'] = schema.title;
+          uiSchema['ui:title'] = schema.title || "";
         }
-      }
-      if (schema.description) {
-        uiSchema['ui:description'] = schema.description;
-      }
+    
+     
+        uiSchema['ui:description'] = schema.description || "";
+     
       if (!isRoot) {
         uiSchema['ui:readonly'] = schema.readOnly || false;
         uiSchema['ui:disabled'] = schema.disabled || false;
@@ -363,7 +363,7 @@ export function determineFieldType(schema : any) {
     return processUiEquivalents(result);
   }
   
-  function processUiEquivalents(obj:any) {
+  function processUiEquivalents(obj: any) {
     if (typeof obj !== 'object' || obj === null) return obj;
   
     // Process nested objects first
@@ -376,11 +376,35 @@ export function determineFieldType(schema : any) {
     // Handle ui:options equivalence
     if (obj['ui:options']) {
       const uiOptions = obj['ui:options'];
+      const keysToDelete: string[] = []; // Track keys to delete after processing
+  
       for (const optionKey in uiOptions) {
         const uiKey = `ui:${optionKey}`;
         if (obj.hasOwnProperty(uiKey)) {
-          delete obj[uiKey];
+          // If the ui:fieldname already exists, merge the options
+          if (typeof obj[uiKey] === 'object' && !Array.isArray(obj[uiKey])) {
+            obj[uiKey] = { ...obj[uiKey], ...uiOptions[optionKey] };
+          } else {
+            obj[uiKey] = uiOptions[optionKey];
+          }
+        } else {
+          // If the ui:fieldname doesn't exist, create it
+          obj[uiKey] = uiOptions[optionKey];
         }
+        keysToDelete.push(optionKey); // Mark this key for deletion
+      }
+  
+      // Delete the entire field from ui:options
+      for (const key of keysToDelete) {
+        delete uiOptions[key];
+      }
+  
+      // If ui:options is now empty, delete it entirely
+      if (Object.keys(uiOptions).length === 0) {
+        delete obj['ui:options'];
+      } else if (uiOptions.options && Object.keys(uiOptions.options).length === 0) {
+        // If the 'options' field is empty, delete it
+        delete uiOptions.options;
       }
     }
   
