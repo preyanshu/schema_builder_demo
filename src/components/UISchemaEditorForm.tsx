@@ -106,10 +106,18 @@ const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange }) => 
         return null; // Handled by main navigation
       }
 
+
       if (key === 'ui:widget') {
+
+        type AllowedWidgetType = 'string' | 'number' | 'bool' | 'enum' | 'array' | 'oneOf' | 'anyOf' | 'allOf';
+
         const parentNode = getNodeByPath(localSchema, fullPath.slice(0, -1));
-        const underlyingType = parentNode?.['ui:fieldType'] || 'string';
-        const allowed = allowedWidgetsMapping[underlyingType as keyof typeof allowedWidgetsMapping] || widgetOptions;
+        const underlyingType =
+          parentNode && parentNode['ui:fieldType']
+            ? parentNode['ui:fieldType']
+            : 'string';
+
+        const allowed = allowedWidgetsMapping[underlyingType as AllowedWidgetType] || widgetOptions;
 
         return (
           <Field
@@ -133,7 +141,7 @@ const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange }) => 
           path={fullPath}
           onFieldChange={updateSchema}
           fieldType={derivedFieldType}
-          options={derivedFieldType === "select" ? widgetOptions : []}
+          options={(derivedFieldType as "text" | "checkbox" | "select") === "select" ? widgetOptions : []}
         />
       );
     },
