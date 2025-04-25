@@ -596,7 +596,7 @@ const clickableCards = sortedKeys.flatMap((key) => {
   return null;
 });
 
-let initialRemainingKeys = sortedKeys.filter((key) => !renderedKeys.has(key));
+const initialRemainingKeys = sortedKeys.filter((key) => !renderedKeys.has(key));
 
 let basicInputFields: JSX.Element[] = [];
 let remainingFieldsAccordion = null;
