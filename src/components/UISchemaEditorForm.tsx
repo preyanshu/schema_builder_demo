@@ -508,10 +508,14 @@ const clickableCards = sortedKeys.flatMap((key) => {
 
   if (conditionalKeys.includes(key) && key !== 'ui:emptyValue') {
     renderedKeys.add(key);
-    const typeLabels = {
-      oneOf: 'One Of',
-      allOf: 'All Of',
-      anyOf: 'Any Of',
+    const typeLabels: {
+      oneOf: string;
+      allOf: string;
+      anyOf: string;
+    } = {
+      oneOf: "One of",
+      allOf: "All of",
+      anyOf: "Any of",
     };
 
     // {typeLabels[key] || typeLabels[lastPathKey]} Conditions
@@ -526,7 +530,9 @@ const clickableCards = sortedKeys.flatMap((key) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium">
-            {typeLabels[key] || typeLabels[lastPathKey]} Conditions
+            {(typeLabels as Record<string, string>)[key as string] ??
+  (typeLabels as Record<string, string>)[lastPathKey as string] ??
+  "Conditions"}
             </span>
             {fieldType && <FieldTypeBadge type={fieldType} />}
           </div>
@@ -603,7 +609,7 @@ if (initialRemainingKeys.length >= 4) {
     .map((key) => {
       renderedKeys.add(key); // Now mutate safely
       return renderField(key, currentNode[key], currentPath, 0);
-    });
+    }) .filter((el): el is JSX.Element => el !== null);;
 
   // Recalculate remaining keys after rendering title & description
   const remainingKeys = sortedKeys.filter((key) => !renderedKeys.has(key));
@@ -625,10 +631,13 @@ if (initialRemainingKeys.length >= 4) {
   );
 } else {
   // Less than 4? Just render all directly
-  basicInputFields = initialRemainingKeys.map((key) => {
+  basicInputFields = initialRemainingKeys
+  .map((key) => {
     renderedKeys.add(key);
     return renderField(key, currentNode[key], currentPath, 0);
-  });
+  })
+  .filter((el): el is JSX.Element => el !== null);
+
 }
 
 
