@@ -71,7 +71,93 @@ export const widgetOptions = [
     "description": "This is a example form to demonstrate the working for UISchema builder."
   }
 
-export const UISchema = {"g":[
-  ["kernel_address",{"ui:widget":"text","ui:options":{"label":"Kernel address","placeholder":"Enter kernel address"}}],
-  "lol"
-]}
+export const UISchema = {
+  "ui:globalOptions": {
+    "copyable": true
+  },
+  "ui:submitButtonOptions": {
+    "props": {
+      "disabled": false
+    },
+    "norender": false,
+    "submitText": "Save"
+  },
+  "ui:order": [
+    "authorized_cw20_addresses",
+    "authorized_token_addresses",
+    "kernel_address",
+    "owner"
+  ],
+  "authorized_cw20_addresses": {
+    "ui:arrayOptions": {
+      "addable": true,
+      "orderable": true,
+      "removable": true
+    },
+    "items": {
+      "ui:widget": "text",
+      "ui:inputType": "",
+      "ui:placeholder": "Enter value",
+      "ui:autofocus": false,
+      "ui:title": "",
+      "ui:description": "A raw address (andr1....), a valid vfs path (~username/app/component), app component (./component) or ibc protocol path (ibc://cosmoshub-4/user/app/component)",
+      "ui:readonly": false,
+      "ui:disabled": false,
+      "ui:fieldType": "string",
+      "ui:emptyValue": ""
+    },
+    "ui:title": "Authorized cw20 addresses",
+    "ui:description": "",
+    "ui:readonly": false,
+    "ui:disabled": false
+  },
+  "authorized_token_addresses": {
+    "ui:arrayOptions": {
+      "addable": true,
+      "orderable": true,
+      "removable": true
+    },
+    "items": {
+      "ui:widget": "text",
+      "ui:inputType": "",
+      "ui:placeholder": "Enter value",
+      "ui:autofocus": false,
+      "ui:title": "",
+      "ui:description": "A raw address (andr1....), a valid vfs path (~username/app/component), app component (./component) or ibc protocol path (ibc://cosmoshub-4/user/app/component)",
+      "ui:readonly": false,
+      "ui:disabled": false,
+      "ui:fieldType": "string",
+      "ui:emptyValue": ""
+    },
+    "ui:title": "Authorized token addresses",
+    "ui:description": "",
+    "ui:readonly": false,
+    "ui:disabled": false
+  },
+  "kernel_address": {
+    "ui:widget": "text",
+    "ui:inputType": "",
+    "ui:placeholder": "Enter kernel address",
+    "ui:autofocus": false,
+    "ui:title": "Kernel address",
+    "ui:description": "",
+    "ui:readonly": false,
+    "ui:disabled": false,
+    "ui:fieldType": "string",
+    "ui:emptyValue": ""
+  },
+  "owner": {
+    "ui:widget": "text",
+    "ui:inputType": "",
+    "ui:placeholder": "Enter owner",
+    "ui:autofocus": false,
+    "ui:title": "Owner",
+    "ui:description": "",
+    "ui:readonly": false,
+    "ui:disabled": false,
+    "ui:fieldType": "string",
+    "ui:emptyValue": ""
+  },
+  "ui:title": "Example JSON Schema",
+  "ui:description": "This is a example form to demonstrate the working for UISchema builder."
+}
