@@ -21,6 +21,10 @@ import {
   resolveSchema,
   cleanUiSchema
 } from "@/utils/uiSchemaHelpers" 
+import useScrollToField from "./useScrollToField";
+import isEqual from "lodash.isequal";
+import { useCallback } from "react";
+
 
 
 
@@ -36,6 +40,11 @@ export default function UISchemaEditorDemo() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [pastedJSON, setPastedJSON] = useState<string>("")
   const [importError, setImportError] = useState<string>("")
+
+  const [focusPath, setFocusPath] = useState<string[]>([]);
+
+
+
 
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -142,6 +151,8 @@ export default function UISchemaEditorDemo() {
   }
 
 
+  useScrollToField(focusPath);
+
 
   return (<>
 
@@ -159,7 +170,7 @@ export default function UISchemaEditorDemo() {
       <div className="flex flex-wrap md:flex-nowrap gap-4 w-full">
  
   <div className="w-full md:w-1/2 border rounded p-4 h-[82vh] overflow-x-auto">
-    <UISchemaEditor uiSchema={schema} onChange={setSchema} />
+    <UISchemaEditor uiSchema={schema} onChange={setSchema} onFocusPath={setFocusPath} />
   </div>
 
 
@@ -182,6 +193,7 @@ export default function UISchemaEditorDemo() {
             onError={(errors: any) => alert(`Validation errors: ${JSON.stringify(errors)}`)}
             onSubmit={(e: any) => alert("formData " + JSON.stringify(e.formData))}
             showErrorList="top"
+            focusPath={focusPath}
           />
 
            

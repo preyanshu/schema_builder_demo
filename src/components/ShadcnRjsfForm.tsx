@@ -64,32 +64,55 @@ const ErrorMessage = ({ children }: { children: React.ReactNode }) => (
   <p className="text-sm text-red-500 ">{children}</p>
 )
 
-/* FieldTemplate - Grid layout for form fields */
-const FieldTemplate = ({
+export const FieldTemplate = ({
   id,
   label,
-  help,
-  required,
   description,
   errors,
+  help,
+  required,
+  hidden,
   children,
-  hidden
+  onFocusPath,
 }: any) => {
   if (hidden) return null;
+
+  const path = id.replace(/^root_/, "").split("_");
+  const handleFocus = () => onFocusPath?.(path);
+
+  // Wrap everything in a single <div> that carries the id
   return (
-    <div >
+    <div
+      id={id}
+      onFocusCapture={handleFocus}
+      style={{ outline: "none" }}
+    >
       {label && (
-        <Label htmlFor={id} className="text-sm font-medium  my-[10px] mr-3 ">
-          {label} {required && "*"} 
+        <Label htmlFor={id} id={`${id}__title`} className="text-sm font-medium mb-1">
+          {label} {required && "*"}
         </Label>
       )}
+
       {children}
-      {description && <div className="my-3 "><Description>{description}</Description></div>}
-      {errors && errors.length > 0 && <ErrorMessage> {errors}</ErrorMessage>}
-      {help && <div className="my-3 "><Description  >{help}</Description></div>}
+
+      {description && (
+        <p id={`${id}__description`} className="text-sm text-muted-foreground mt-1">
+          <Description>{description}</Description>
+        </p>
+      )}
+      {errors && errors.length > 0 && (
+        <p id={`${id}__error`} className="text-sm text-red-500 mt-1">
+          <ErrorMessage>{errors}</ErrorMessage>
+        </p>
+      )}
+      {help && (
+        <p id={`${id}__help`} className="text-sm text-muted-foreground mt-1">
+          <Description>{help}</Description>
+        </p>
+      )}
     </div>
-  )
-}
+  );
+};
 
 /* DescriptionField */
 const DescriptionField = ({ description }: any) =>
@@ -637,14 +660,14 @@ const CheckboxesWidget=({
 
 /* Submit Button */
 const SubmitButton = (
-  {uiSchema}: any) => {
+  {uiSchema, id}: any) => {
   const options = uiSchema["ui:options"]?.submitButtonOptions 
   console.log("options",options)
   
 return(<>
 {!options.norender && <>
 
-  <Button type="submit" disabled={options?.props?.disabled}  >
+  <Button type="submit" id="root_submitButtonOptions" disabled={options?.props?.disabled}  >
     {options.submitText || "Submit"} 
   </Button>
 

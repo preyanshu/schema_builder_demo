@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EmptyValueFieldProps } from '../types';
 
-export const EmptyValueField: FC<EmptyValueFieldProps> = memo(({ value, path, onFieldChange }) => {
+export const EmptyValueField: FC<EmptyValueFieldProps> = memo(({ value, path, onFieldChange , onFocus}) => {
     const [selectedType, setSelectedType] = useState('string');
     const [inputValue, setInputValue] = useState('');
   
@@ -82,7 +82,13 @@ export const EmptyValueField: FC<EmptyValueFieldProps> = memo(({ value, path, on
       <div className="space-y-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium">Empty Value Type</Label>
-          <Select value={selectedType} onValueChange={handleTypeChange}>
+          <Select value={selectedType} onValueChange={(val) => {
+             handleTypeChange(val);
+             onFocus?.(); 
+           }}
+            onOpenChange={(isOpen) => {
+              if (isOpen) onFocus?.();
+            }}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -99,7 +105,17 @@ export const EmptyValueField: FC<EmptyValueFieldProps> = memo(({ value, path, on
         <div className="space-y-2">
           <Label className="text-sm font-medium">Empty Value</Label>
           {selectedType === 'boolean' ? (
-            <Select value={inputValue} onValueChange={handleValueChange}>
+           <Select
+           value={inputValue}
+           onValueChange={(val) => {
+             handleValueChange(val);
+             onFocus?.(); 
+           }}
+            onOpenChange={(isOpen) => {
+              if (isOpen) onFocus?.();
+            }}
+         
+         >
               <SelectTrigger>
                 <SelectValue placeholder="Select boolean" />
               </SelectTrigger>
@@ -112,18 +128,27 @@ export const EmptyValueField: FC<EmptyValueFieldProps> = memo(({ value, path, on
             <Input
               type="number"
               value={inputValue}
-              onChange={(e) => handleValueChange(e.target.value)}
+              onChange={(e) => {handleValueChange(e.target.value)
+                onFocus?.();
+              }}
+              onFocus={onFocus}
             />
           ) : selectedType === 'string' ? (
             <Input
               value={inputValue}
-              onChange={(e) => handleValueChange(e.target.value)}
+              onChange={(e) => {handleValueChange(e.target.value)
+                onFocus?.();
+              }}
+              onFocus={onFocus}
             />
           ) : (selectedType === 'object' || selectedType === 'array') ? (
             <textarea
               className="w-full h-32 font-mono text-sm p-2 border rounded bg-background"
               value={inputValue}
-              onChange={(e) => handleValueChange(e.target.value)}
+              onChange={(e) => {handleValueChange(e.target.value)
+                onFocus?.();
+              }}
+              onFocus={onFocus}
               placeholder={`Enter ${selectedType} as JSON`}
             />
           ) : null}

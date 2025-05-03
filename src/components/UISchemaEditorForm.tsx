@@ -14,7 +14,7 @@ import { ChevronRight } from 'lucide-react';
 import React from 'react';
 import { boolean, late } from 'zod';
 
-const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange }) => {
+const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange,onFocusPath }) => {
   const [localSchema, setLocalSchema] = useState<any>(uiSchema);
   const [currentPath, setCurrentPath] = useState<string[]>([]);
 
@@ -95,6 +95,9 @@ const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange }) => 
             value={value}
             path={fullPath}
             onFieldChange={updateSchema}
+            {...(onFocusPath
+              ? { onFocus: () => onFocusPath(fullPath) }
+              : {})}
           />
         );
       }
@@ -148,143 +151,6 @@ const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange }) => 
         );
       }
 
-      // if (['anyOf', 'allOf', 'oneOf'].includes(key)) {
-      //   const typeLabels = {
-      //     anyOf: 'Any Of',
-      //     allOf: 'All Of',
-      //     oneOf: 'One Of',
-      //   };
-
-      //   const typedKey = key as 'anyOf' | 'allOf' | 'oneOf';
-
-      //   return (<>
-     
-      //       <CardHeader className="py-3 px-4">
-      //         <div className="flex items-center gap-2">
-      //           {depth > 0 && (
-      //             <div className="text-xs text-muted-foreground flex items-center">
-      //               {path.map((p, i) => (
-      //                 <React.Fragment key={`breadcrumb-${i}`}>
-      //                   {i > 0 && <ChevronRight className="h-3 w-3 mx-1" />}
-      //                   <span>{p}</span>
-      //                 </React.Fragment>
-      //               ))}
-      //             </div>
-      //           )}
-      //           <CardTitle className="text-sm font-semibold">
-      //             {typeLabels[typedKey]} Conditions
-      //           </CardTitle>
-      //         </div>
-      //       </CardHeader>
-      //       <CardContent className="space-y-4">
-      //         {Array.isArray(value) &&
-      //           value.map((condition, index) => (
-      //             <div key={`${fieldKey}-cond-${index}-${depth}`} className="mb-6">
-      //               <div className="flex items-center gap-2 mb-3">
-      //                 <span className="text-xs font-medium">
-      //                   Condition {index + 1}
-      //                 </span>
-      //               </div>
-      //               <div className="space-y-4 ml-4">
-      //                 {typeof condition === 'object' &&
-      //                   Object.entries(condition).map(([subKey, subValue]) =>
-      //                     renderField(
-      //                       subKey,
-      //                       subValue,
-      //                       [...fullPath, index.toString()],
-      //                       depth + 1
-      //                     )
-      //                   )}
-      //               </div>
-      //             </div>
-      //           ))}
-      //       </CardContent>
-    
-      //       </>);
-      // }
-
-      // if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      //   const allKeys = Object.keys(value);
-      //   let sortedKeys = allKeys;
-      //   if (value.hasOwnProperty('ui:order') && Array.isArray(value['ui:order'])) {
-      //     const order = value['ui:order'];
-      //     const unorderedKeys = allKeys.filter(
-      //       (k) => k !== 'ui:order' && !order.includes(k)
-      //     );
-      //     sortedKeys = [...order, ...unorderedKeys];
-      //   }
-
-      //   const basicKeys = ['ui:title', 'ui:description', 'ui:order'];
-      //   const advancedKeys = sortedKeys.filter((subKey) => !basicKeys.includes(subKey));
-
-      //   return (
-      //     <Card className={`ml-4 min-w-[250px] ${depth > 0 ? 'mt-2' : ''}`}>
-      //       <CardContent className="pt-4 space-y-4">
-      //         <fieldset className="space-y-4" key={`${fieldKey}-cond-${depth}`}>
-      //           <legend className="flex justify-between items-center text-sm font-medium mb-2 w-full">
-      //             <div className="flex items-center gap-2">
-      //               {depth > 0 && (
-      //                 <div className="text-xs text-muted-foreground flex items-center">
-      //                   {path.map((p, i) => (
-      //                     <React.Fragment key={`breadcrumb-${i}`}>
-      //                       {i > 0 && <ChevronRight className="h-3 w-3 mx-1" />}
-      //                       <span>{p}</span>
-      //                     </React.Fragment>
-      //                   ))}
-      //                 </div>
-      //               )}
-      //               <span>{key.replace(/^ui:/, '')}</span>
-      //             </div>
-      //             {value["ui:fieldType"] ? (
-      //               <Badge variant="secondary">{value["ui:fieldType"]}</Badge>
-      //             ) : value["ui:arrayOptions"] ? (
-      //               <Badge variant="secondary">Array</Badge>
-      //             ) : null}
-      //           </legend>
-
-      //           {sortedKeys
-      //             .filter((subKey) => basicKeys.includes(subKey))
-      //             .map((subKey) => (
-      //               <div key={`${fieldKey}-basic-${subKey}`}>
-      //                 {subKey === 'ui:order' ? (
-      //                   <div className={`ml-${(depth + 1) * 4} mb-4`}>
-      //                     <Label className="block text-sm font-medium mb-1">
-      //                       Order
-      //                     </Label>
-      //                     <SortableList
-      //                       items={value[subKey]}
-      //                       onReorder={(newOrder) =>
-      //                         updateSchema([...fullPath, subKey], newOrder)
-      //                       }
-      //                     />
-      //                   </div>
-      //                 ) : (
-      //                   renderField(subKey, value[subKey], fullPath, depth + 1)
-      //                 )}
-      //               </div>
-      //             ))}
-
-      //           {advancedKeys.length > 0 && (
-      //             <Accordion type="single" collapsible className="w-full">
-      //               <AccordionItem value="advanced">
-      //                 <AccordionTrigger className="text-sm py-2">
-      //                   Options
-      //                 </AccordionTrigger>
-      //                 <AccordionContent className="pt-4 space-y-4">
-      //                   {advancedKeys.map((subKey) => (
-      //                     <div key={`${fieldKey}-advanced-${subKey}`}>
-      //                       {renderField(subKey, value[subKey], fullPath, depth + 1)}
-      //                     </div>
-      //                   ))}
-      //                 </AccordionContent>
-      //               </AccordionItem>
-      //             </Accordion>
-      //           )}
-      //         </fieldset>
-      //       </CardContent>
-      //     </Card>
-      //   );
-      // }
 
       if (Array.isArray(value)) {
         const isArrayOfObjects =
@@ -349,6 +215,10 @@ const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange }) => 
                   path={[...fullPath, index.toString()]}
                   onFieldChange={updateSchema}
                   fieldType="text"
+                  {...(onFocusPath
+                    ? { onFocus: () => onFocusPath(fullPath) }
+                    : {})}
+                  
                 />
               ))}
             </div>
@@ -376,6 +246,9 @@ const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange }) => 
             onFieldChange={handleWidgetChange}
             fieldType="select"
             options={allowed}
+            {...(onFocusPath
+              ? { onFocus: () => onFocusPath(fullPath) }
+              : {})}
           />
         );
       }
@@ -390,6 +263,9 @@ const UISchemaEditorForm: FC<UISchemaEditorProps> = ({ uiSchema, onChange }) => 
         onFieldChange={updateSchema}
         fieldType={derivedFieldType}
         options={(derivedFieldType as "text" | "checkbox" | "select") === "select" ? widgetOptions : []}
+        {...(onFocusPath
+          ? { onFocus: () => onFocusPath(fullPath) }
+          : {})}
       />
       );
     },
